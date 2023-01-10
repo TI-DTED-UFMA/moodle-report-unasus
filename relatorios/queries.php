@@ -274,7 +274,7 @@ function query_postagens_forum_from_users($cohort_estudantes) {
                           JOIN {forum_posts} fp
                             ON (fd.id = fp.discussion)
                          WHERE f.id=:forumid
-                      GROUP BY fp.userid
+                      GROUP BY fp.userid, fp.created, fd.name, f.id
                       ORDER BY fp.created ASC
                    ) fp
                 ON (fp.userid_posts=u.id)
@@ -291,7 +291,7 @@ function query_postagens_forum_from_users($cohort_estudantes) {
                               gi.itemmodule = 'forum'  AND gi.iteminstance=f.id)
                         JOIN {grade_grades} gg
                           ON (gg.itemid=gi.id)
-                    GROUP BY gg.userid, gg.itemid
+                    GROUP BY gg.userid, gg.itemid, gg.rawgrade, gg.timemodified, f.id, gi.grademax
                   ) gg
                ON (gg.userid = u.id AND fp.itemid=gg.forumid)
          ORDER BY grupo_id, u.firstname, u.lastname
@@ -583,7 +583,7 @@ function query_atividades_from_users($cohort_estudantes) {
                                 FROM {assign_submission}
                             ORDER BY attemptnumber DESC
                            ) sub
-                    GROUP BY sub.userid, sub.assignment
+                    GROUP BY sub.userid, sub.assignment, sub.id, sub.timecreated, sub.timemodified, sub.status, sub.groupid, sub.attemptnumber, sub.latest
                    ) sub
                 ON (u.id=sub.userid AND sub.assignment=:assignmentid)
          LEFT JOIN {assign_grades} gr
@@ -861,7 +861,7 @@ function query_quiz_from_users($cohort_estudantes) {
                                  WHERE (quiz=:assignmentid AND timefinish != 0)
                               ORDER BY attempt DESC
                                 ) qa
-                      GROUP BY qa.userid, qa.quiz
+                      GROUP BY qa.userid, qa.quiz, qa.id, qa.attempt, qa.uniqueid, qa.layout, qa.currentpage, qa.preview, qa.state, qa.timestart, qa.timefinish, qa.timemodified, qa.timemodifiedoffline, qa.timecheckstate, qa.sumgrades
                    ) qa
                 ON (qa.userid = u.id)
          LEFT JOIN {quiz_grades} qg
