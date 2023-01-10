@@ -28,7 +28,7 @@ function report_unasus_get_count_estudantes($categoria_turma) {
                  AND rm.relationshipcohortid=:cohort_id)
           INNER JOIN {user} u
                   ON (u.id=rm.userid)
-            GROUP BY rg.id
+            GROUP BY rg.id, u.id
             ORDER BY rg.id";
     $params = array('relationship_id' => $relationship->id, 'cohort_id' => $cohort_estudantes->id);
 
@@ -55,7 +55,7 @@ function report_unasus_get_count_estudantes_orientacao($categoria_turma) {
                  AND rm.relationshipcohortid=:cohort_id)
           INNER JOIN {user} u
                   ON (u.id=rm.userid)
-            GROUP BY rg.id
+            GROUP BY rg.id, u.id
             ORDER BY rg.id";
     $params = array('relationship_id' => $relationship->id, 'cohort_id' => $cohort_estudantes->id);
 
@@ -170,7 +170,9 @@ function report_unasus_get_id_nome_modulos($ufsc_category, $method = 'get_record
                     CONCAT(shortname, ' - '), '') AS fullname,
                     c.category AS categoryid,
                     cc.name AS category,
-                    cc.depth
+                    cc.depth,
+                    cc.sortorder,
+                    c.sortorder
                FROM {course} c
                JOIN {course_categories} cc
                  ON (c.category = cc.id
@@ -182,8 +184,29 @@ function report_unasus_get_id_nome_modulos($ufsc_category, $method = 'get_record
                JOIN {course_modules} cm
                  ON (c.id = cm.course)
               WHERE c.id != :siteid
-                AND c.visible=TRUE
+                AND c.visible=1
            ORDER BY cc.depth, cc.sortorder, c.sortorder";
+        $sql = " SELECT DISTINCT(c.id),
+        REPLACE(fullname,
+        CONCAT(shortname, ' - '), '') AS fullname,
+        c.category AS categoryid,
+        cc.name AS category,
+        cc.depth,
+        cc.sortorder, 
+        c.sortorder
+   FROM {course} c
+   JOIN {course_categories} cc
+     ON (c.category = cc.id
+         AND (
+               ((cc.path LIKE '%/$ufsc_category') or
+                (cc.path LIKE '%/$ufsc_category/%'))
+              )
+        )
+   JOIN {course_modules} cm
+     ON (c.id = cm.course)
+  WHERE c.id != :siteid
+    AND c.visible=1
+ORDER BY cc.depth, cc.sortorder, c.sortorder";
 
     $params = array('siteid' => $SITE->id);
     $modulos = $DB->$method($sql, $params);
@@ -790,6 +813,24 @@ function report_unasus_query_lti_courses_moodle($courses) {
                   ON (m.id = cm.module AND m.name LIKE 'lti')
                WHERE c.id IN ({$string_courses}) -- AND cm.visible=TRUE
             ORDER BY c.sortorder, lti_id";
+            $query = "SELECT l.id AS lti_id,
+		             l.name AS name,
+		             c.id AS course_id,
+		             REPLACE(c.fullname, CONCAT(shortname, ' - '), '') AS course_name,
+                     cm.id AS coursemoduleid,
+	                 cm.groupingid AS grouping_id,
+	                 cm.module AS module_id,
+	                 m.name AS module_name,
+	                 cm.completionexpected
+                FROM {course} AS c
+           LEFT JOIN {lti} AS l
+                  ON (c.id = l.course AND c.id != :siteid)
+                JOIN {course_modules} cm
+                  ON (cm.course = c.id AND cm.instance=l.id)
+                JOIN {modules} m
+                  ON (m.id = cm.module AND m.name LIKE 'lti')
+               WHERE c.id IN ({$string_courses}) -- AND cm.visible=TRUE
+            ORDER BY c.sortorder, lti_id";
 
         return $DB->get_recordset_sql($query, array('siteid' => SITEID));
     }
@@ -844,6 +885,29 @@ function report_unasus_query_forum_courses($courses) {
                  -- AND cm.visible=TRUE
                  AND (gi.id=TRUE OR cm.completion != 0)
             ORDER BY c.sortorder, forum_id";
+            $query = "SELECT f.id AS forum_id,
+            f.name AS forum_name,
+            cm.completionexpected,
+            c.id AS course_id,
+            REPLACE(c.fullname, CONCAT(shortname, ' - '), '') AS course_name,
+            cm.groupingid as grouping_id,
+            cm.module AS module_id,
+            m.name AS module_name,
+            cm.id AS coursemoduleid
+       FROM {course} AS c
+  LEFT JOIN {forum} AS f
+         ON (c.id = f.course AND c.id != :siteid)
+  LEFT JOIN {grade_items} AS gi
+         ON (gi.courseid=c.id AND gi.itemtype = 'mod' AND
+             gi.itemmodule = 'forum'  AND gi.iteminstance=f.id)
+       JOIN {course_modules} cm
+         ON (cm.course=c.id AND cm.instance=f.id)
+       JOIN {modules} m
+         ON (m.id = cm.module AND m.name LIKE 'forum')
+      WHERE c.id IN ({$string_courses})
+        -- AND cm.visible=TRUE
+        AND (gi.id!=0 OR cm.completion != 0)
+   ORDER BY c.sortorder, forum_id";
 
         return $DB->get_recordset_sql($query, array('siteid' => SITEID));
     }
