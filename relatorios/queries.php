@@ -257,7 +257,7 @@ function query_postagens_forum_from_users($cohort_estudantes) {
                     {$alunos_grupo_tutoria}
                     JOIN (
                               SELECT
-                                    userid, SUM(id = 5) > 0 AS is_student
+                                    userid, count(id = 5) > 0 AS is_student
                               FROM (
                                       {$is_student}
                                     ) st
@@ -567,7 +567,7 @@ function query_atividades_from_users($cohort_estudantes) {
                       {$alunos_grupo_tutoria}
                       JOIN (
                               SELECT
-                                    userid, SUM(id = 5) > 0 AS is_student
+                                    userid, count(id = 5) > 0 AS is_student
                               FROM (
                                       {$is_student}
                                     ) st
@@ -642,7 +642,7 @@ function query_database_adjusted_from_users($cohort_estudantes) {
                     {$alunos_grupo_tutoria}
                         JOIN (
                               SELECT
-                                    userid, SUM(id = 5) > 0 AS is_student
+                                    userid, count(id = 5) > 0 AS is_student
                               FROM (
                                       {$is_student}
                                     ) st
@@ -688,7 +688,7 @@ function query_scorm_from_users ($cohort_estudantes) {
                     {$alunos_grupo_tutoria}
                     JOIN (
                               SELECT
-                                    userid, SUM(id = 5) > 0 AS is_student
+                                    userid, count(id = 5) > 0 AS is_student
                               FROM (
                                       {$is_student}
                                     ) st
@@ -732,7 +732,7 @@ function query_lti_from_users ($cohort_estudantes) {
                     {$alunos_grupo_tutoria}
                       JOIN (
                               SELECT
-                                    userid, SUM(id = 5) > 0 AS is_student
+                                    userid, count(id = 5) > 0 AS is_student
                               FROM (
                                       {$is_student}
                                     ) st
@@ -785,7 +785,7 @@ function query_nota_final($cohort_estudantes) {
                     {$alunos_grupo_tutoria}
                     JOIN (
                               SELECT
-                                    userid, SUM(id = 5) > 0 AS is_student
+                                    userid, count(id = 5) > 0 AS is_student
                               FROM (
                                       {$is_student}
                                     ) st
@@ -844,7 +844,7 @@ function query_quiz_from_users($cohort_estudantes) {
                       {$alunos_grupo_tutoria}
                       JOIN (
                           SELECT
-                                userid, SUM(id = 5) > 0 AS is_student
+                                userid, count(id = 5) > 0 AS is_student
                           FROM (
                                   {$is_student}
                                 ) st
@@ -895,7 +895,7 @@ function query_grades_lti($cohort_estudantes) {
                     {$alunos_grupo_tutoria}
                       JOIN (
                               SELECT
-                                    userid, SUM(id = 5) > 0 AS is_student
+                                    userid, count(id = 5) > 0 AS is_student
                               FROM (
                                       {$is_student}
                                     ) st
