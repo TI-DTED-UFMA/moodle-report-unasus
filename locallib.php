@@ -8,7 +8,7 @@ require_once($CFG->dirroot . '/report/unasus/datastructures.php');
 require_once($CFG->dirroot . '/report/unasus/activities_datastructures.php');
 require_once($CFG->dirroot . '/report/unasus/relatorios/queries.php');
 require_once($CFG->dirroot . '/report/unasus/relatorios/loops.php');
-require_once($CFG->dirroot . '/report/unasus/sistematcc.php');
+//require_once($CFG->dirroot . '/report/unasus/sistematcc.php');
 
 function report_unasus_get_datetime_from_unixtime($unixtime) {
     return date_create(date("Y-m-d H:m:s", $unixtime));
