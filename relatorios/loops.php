@@ -88,7 +88,8 @@ function loop_atividades_e_foruns_de_um_modulo($query_atividades, $query_forum, 
                         }
 
                         //adiona ao grupo somente se for estudante
-                        if($r->is_student == "1") {
+                        //if($r->is_student == "1") {
+                        if($r->is_student == "t") {
                             // Agrupa os dados por usuário
                             $group_array_do_grupo->add($r->userid, $data);
                         }
@@ -131,6 +132,7 @@ function loop_atividades_e_foruns_de_um_modulo($query_atividades, $query_forum, 
                             // Agrupa os dados por usuário
                             $group_array_do_grupo->add($f->userid, $data);
                         }
+                        
                     }
                 // atividade de quiz
                 } elseif (is_a($atividade, 'report_unasus_quiz_activity') && !empty($query_quiz)) {

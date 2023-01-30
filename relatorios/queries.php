@@ -239,7 +239,7 @@ function query_alunos_grupo_orientacao() {
 function query_postagens_forum_from_users($cohort_estudantes) {
     $alunos_grupo_tutoria = query_alunos_relationship_student($cohort_estudantes);
     $is_student = query_is_student();
-
+  // Verificar se o aluno possui postagens no forum **
     return "SELECT u.id AS userid,
                    u.polo,
                    u.cohort,
@@ -550,7 +550,7 @@ function query_atividades_from_users($cohort_estudantes) {
     $alunos_grupo_tutoria = query_alunos_relationship_student($cohort_estudantes);
 
     $is_student = query_is_student();
-
+    //Bem aqui tem o problema da consulta de estudante, ele retorno "t" se for estudante em vez de "1"
     return "SELECT u.id AS userid,
                    u.polo,
                    u.cohort,

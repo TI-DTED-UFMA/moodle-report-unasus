@@ -125,7 +125,7 @@ class report_estudante_sem_atividade_postada extends report_unasus_factory {
                         $dados[$key][] = $lista_atividades;
                     }
                 }
-                $lista_atividades = null;
+            //    $lista_atividades = null;
             }
 
             // Ou unir os alunos de acordo com o tutor dele
@@ -133,6 +133,7 @@ class report_estudante_sem_atividade_postada extends report_unasus_factory {
                 $dados[local_tutores_grupos_tutoria::grupo_tutoria_to_string($this->get_categoria_turma_ufsc(), $grupo_id)] = $estudantes;
             }
         }
+        
         return $dados;
     }
 
