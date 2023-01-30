@@ -125,7 +125,7 @@ class report_estudante_sem_atividade_postada extends report_unasus_factory {
                         $dados[$key][] = $lista_atividades;
                     }
                 }
-            //    $lista_atividades = null;
+                $lista_atividades = null;
             }
 
             // Ou unir os alunos de acordo com o tutor dele

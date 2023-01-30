@@ -236,7 +236,7 @@ class report_entrega_de_atividades extends report_unasus_factory {
                 $dados[local_tutores_grupos_tutoria::grupo_tutoria_to_string($categoria_turma_ufsc, $grupo->id)] = $estudantes;
             }
 
-            //$lista_atividades = null;
+            $lista_atividades = null;
         }
 
         return $dados;
