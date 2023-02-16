@@ -55,7 +55,7 @@ function report_unasus_extend_navigation_course($navigation, $course, $context) 
 
     //Caso usuário seja tutor
     if( ($course->id != SITEID && has_capability('report/unasus:view_all', $context)) ||
-        ($course->id != SITEID && has_capability('report/unasus:view_tutoria', $context))
+        ($course->id != SITEID && has_capability('report/unasus:view_tutoria', $context) || is_siteadmin())
       ) {
         $reports = array_merge($reports, report_unasus_relatorios_validos_tutoria_list());
     }
@@ -78,11 +78,23 @@ function report_unasus_extend_navigation_course($navigation, $course, $context) 
         ($course->id != SITEID && has_capability('report/unasus:view_orientacao', $context))
     ) {
 
-        $unasus_node = $navigation->add(get_string('unasus_navigation_name', 'report_unasus'), null, navigation_node::TYPE_CONTAINER);
+        $unasus_node = $navigation->add(
+            get_string('unasus_navigation_name', 'report_unasus'), 
+            null, 
+            navigation_node::TYPE_CONTAINER);
 
         foreach ($reports as $report) {
             $url = new moodle_url('/report/unasus/index.php', array('relatorio' => $report, 'course' => $course->id));
-            $unasus_node->add(get_string($report, 'report_unasus'), $url, navigation_node::TYPE_SETTING, null, $report, new pix_icon('i/report', ''));
+            $thingnode = $unasus_node->add(get_string($report, 'report_unasus'), $url, navigation_node::TYPE_SETTING, null, $report, new pix_icon('i/report', ''));
+            $thingnode->make_active();
         }
+
+        foreach ($reports as $report) {
+            $url = new moodle_url('/report/unasus/index.php', array('relatorio' => $report, 'course' => $course->id));
+            $navigation->add(get_string($report, 'report_unasus'), $url, navigation_node::TYPE_SETTING, null, $report, new pix_icon('i/report', ''));
+            //$unasus_node->add(get_string($report, 'report_unasus'), $url, navigation_node::TYPE_SETTING, null, $report, new pix_icon('i/report', ''));
+
+        }
+        $unasus_node->make_active();
     }
 }
