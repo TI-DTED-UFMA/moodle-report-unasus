@@ -319,9 +319,23 @@ function query_acesso_tutor_old() {
         $filtro_tutor = "WHERE u.id IN ({$tutores}) ";
     }
 
-    return "SELECT year(from_unixtime(l.time)) as calendar_year,
+    /*return "SELECT year(from_unixtime(l.time)) as calendar_year,
                    month(from_unixtime(l.time)) as calendar_month,
                    day(from_unixtime(l.time)) as calendar_day,
+                   u.id AS userid
+              FROM {user} u
+              JOIN {relationship_members} rm
+                ON (rm.userid=u.id AND rm.relationshipcohortid=:relationship_cohort_id)
+              JOIN {relationship_groups} rg
+                ON (rg.id=rm.relationshipgroupid AND rg.relationshipid=:relationship_id)
+         LEFT JOIN {log} l
+                ON (u.id=l.userid)
+                   {$filtro_tutor}
+          GROUP BY calendar_year, calendar_month, calendar_day, u.id
+          ORDER BY calendar_year, calendar_month, calendar_day";*/
+          return "SELECT date_part('year', TO_TIMESTAMP(l.time / 1000)) as calendar_year,
+                   date_part('year', TO_TIMESTAMP(l.time / 1000)) as calendar_month,
+                   date_part('year', TO_TIMESTAMP(l.time / 1000)) as calendar_day,
                    u.id AS userid
               FROM {user} u
               JOIN {relationship_members} rm
@@ -349,9 +363,23 @@ function query_acesso_tutor() {
         $filtro_tutor = "WHERE u.id IN ({$tutores}) ";
     }
 
-    return "SELECT year(from_unixtime(l.timecreated)) as calendar_year,
+    /*return "SELECT year(from_unixtime(l.timecreated)) as calendar_year,
                    month(from_unixtime(l.timecreated)) as calendar_month,
                    day(from_unixtime(l.timecreated)) as calendar_day,
+                   u.id AS userid
+              FROM {user} u
+              JOIN {relationship_members} rm
+                ON (rm.userid=u.id AND rm.relationshipcohortid=:relationship_cohort_id)
+              JOIN {relationship_groups} rg
+                ON (rg.id=rm.relationshipgroupid AND rg.relationshipid=:relationship_id)
+         LEFT JOIN {logstore_standard_log} l
+                ON (u.id=l.userid)
+                   {$filtro_tutor}
+          GROUP BY calendar_year, calendar_month, calendar_day, u.id
+          ORDER BY u.firstname, u.lastname, calendar_year, calendar_month, calendar_day";*/
+          return "SELECT date_part('year', TO_TIMESTAMP(l.timecreated / 1000))  as calendar_year,
+                   date_part('month', TO_TIMESTAMP(l.timecreated / 1000))  as calendar_month,
+                   date_part('day', TO_TIMESTAMP(l.timecreated / 1000))  as calendar_day,
                    u.id AS userid
               FROM {user} u
               JOIN {relationship_members} rm
@@ -438,12 +466,30 @@ function query_group_members() {
  */
 function query_uso_sistema_tutor_old() {
 
-    return "SELECT userid, dia , count(*) /2  AS horas
+    /*return "SELECT userid, dia , count(*) /2  AS horas
               FROM (
 
                     SELECT date_format( (FROM_UNIXTIME(time))  , '%d/%m/%Y') AS dia,
                            date_format( (FROM_UNIXTIME(time))  , '%H') AS hora,
                            ROUND (date_format( (FROM_UNIXTIME(time))  , '%i') / 30) *30 AS min,
+                           userid
+                      FROM {log}
+
+                     WHERE time > :tempominimo
+                           AND time < UNIX_TIMESTAMP(DATE_SUB(:tempomaximo,INTERVAL 30 MINUTE)) AND userid=:userid
+                           AND action != 'login' AND action != 'logout'
+                  GROUP BY dia, hora, min
+
+                   ) AS report
+          GROUP BY report.dia";*/
+
+
+return "SELECT userid, dia , count(*) /2  AS horas
+              FROM (
+
+                    SELECT date_format( TO_TIMESTAMP(l.time / 1000))  , '%d/%m/%Y') AS dia,
+                           date_format( (TO_TIMESTAMP(l.time / 1000))  , '%H') AS hora,
+                           ROUND (date_format( (TO_TIMESTAMP(l.time / 1000))  , '%i') / 30) *30 AS min,
                            userid
                       FROM {log}
 
@@ -471,7 +517,7 @@ function query_uso_sistema_tutor() {
         $filtro_tutor = "WHERE u.id IN ({$tutores}) ";
     }
 
-    return "   SELECT u.id, rd.*
+    /*return "   SELECT u.id, rd.*
                  FROM {user} u
             LEFT JOIN (
             
@@ -493,7 +539,31 @@ function query_uso_sistema_tutor() {
           GROUP BY report.dia
           ) rd
           on (u.id = rd.userid)
-          {$filtro_tutor}";
+          {$filtro_tutor}";*/
+
+return "   SELECT u.id, rd.*
+FROM {user} u
+LEFT JOIN (
+
+SELECT userid, dia , count(*) /2  AS horas
+FROM (
+
+   SELECT to_char( (TO_TIMESTAMP(timecreated / 1000))  , 'dd/mm/YYYY') AS dia,
+   to_char( (TO_TIMESTAMP(timecreated / 1000))  , 'HH24') AS hora,
+          ROUND ( to_char( (TO_TIMESTAMP(timecreated / 1000))  , 'MI')::INTEGER / 30) *30 AS min,
+          userid
+     FROM {logstore_standard_log}
+
+    WHERE timecreated > :tempominimo
+          AND TO_TIMESTAMP(timecreated) < TO_TIMESTAMP(:tempomaximo, 'YYYY-MM-DD HH24:MI:SS') AND userid=:userid
+          AND action != 'login' AND action != 'logout'
+ GROUP BY dia, hora, min,  userid
+
+  ) AS report
+GROUP BY report.dia, report.userid
+) rd
+on (u.id = rd.userid)
+{$filtro_tutor}";
 }
 
 /**
